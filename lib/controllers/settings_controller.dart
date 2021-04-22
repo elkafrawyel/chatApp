@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 class SettingsController extends GetxController {
   UserModel userModel;
+  bool showNotification = true;
   bool isDarkMode = LocalStorage().getBool(LocalStorage.darkMode);
 
   @override
@@ -17,6 +18,12 @@ class SettingsController extends GetxController {
     }
     setTheme();
     super.onInit();
+  }
+
+  setShowNotification(bool show) {
+    print('---->Show notification $show');
+    showNotification = show;
+    update();
   }
 
   void setUser(UserModel userModel) {

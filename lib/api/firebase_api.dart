@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chat_app/api/notification_center.dart';
 import 'package:chat_app/controllers/settings_controller.dart';
 import 'package:chat_app/data/super_message_model.dart';
 import 'package:chat_app/data/user_model.dart';
@@ -44,17 +45,17 @@ class FirebaseApi {
       String imageUrl = await imageReference.getDownloadURL();
       //update user profile and save it
       UserModel userModel = UserModel(
-        name,
-        imageUrl,
-        user.uid,
-        phone,
-        email,
-        countryCode,
-        true,
-        DateTime.now().millisecondsSinceEpoch,
-        isMale,
-        null,
-      );
+          name,
+          imageUrl,
+          user.uid,
+          phone,
+          email,
+          countryCode,
+          true,
+          DateTime.now().millisecondsSinceEpoch,
+          isMale,
+          null,
+          null);
 
       _fireStore.collection(userRef).doc(user.uid).set(userModel.toJson());
 
@@ -89,17 +90,17 @@ class FirebaseApi {
 
       //update user profile and save it
       UserModel userModel = UserModel(
-        name,
-        imageUrl == null ? currentUser.imageUrl : imageUrl,
-        currentUser.id,
-        phone,
-        email,
-        countryCode,
-        true,
-        DateTime.now().millisecondsSinceEpoch,
-        currentUser.isMale,
-        bio,
-      );
+          name,
+          imageUrl == null ? currentUser.imageUrl : imageUrl,
+          currentUser.id,
+          phone,
+          email,
+          countryCode,
+          true,
+          DateTime.now().millisecondsSinceEpoch,
+          currentUser.isMale,
+          bio,
+          null);
 
       _fireStore
           .collection(userRef)
@@ -161,6 +162,17 @@ class FirebaseApi {
           .collection(userRef)
           .doc(_auth.currentUser.uid)
           .update(controller.userModel.toJson());
+    }
+  }
+
+  static setFirebaseToken(String token) {
+    UserModel me = UserModel.fromLocalStorage();
+    if (me != null) {
+      me.firebaseToken = token;
+      FirebaseFirestore.instance
+          .collection('Users')
+          .doc(me.id)
+          .update(me.toJson());
     }
   }
 
@@ -245,6 +257,15 @@ class FirebaseApi {
       'lastMessage': newMessage.toJson(),
       'time': DateTime.now().millisecondsSinceEpoch
     });
+
+    //send him a message
+
+
+    NotificationCenter().sendNotification(
+        idUser,
+        UserModel.fromLocalStorage().name,
+        message,
+        NotificationType.CHAT);
   }
 
   static Stream<List<SuperMessage>> getMessagesStream(String idUser) =>

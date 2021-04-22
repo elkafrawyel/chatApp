@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:chat_app/api/notification_center.dart';
 import 'package:chat_app/helper/static_values.dart';
 import 'package:chat_app/screens/home/components/drawer.dart';
 import 'package:chat_app/api/firebase_api.dart';
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           break;
 
         case DataConnectionStatus.disconnected:
+
           setState(() {
             isOnline = false;
           });
@@ -57,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           setState(() {});
         }
       }
+
       //check if app bar is Expanded to change content
       if (scrollController.offset <= 80 &&
           !scrollController.position.outOfRange) {
@@ -88,9 +91,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       //set status to online here in fireStore
       FirebaseApi().setUserOnlineState(true);
+      Get.find<SettingsController>().setShowNotification(false);
+
     } else {
       // set status to offline here in fireStore
       FirebaseApi().setUserOnlineState(false);
+      Get.find<SettingsController>().setShowNotification(true);
     }
   }
 

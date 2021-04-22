@@ -134,9 +134,9 @@ class ChatCard extends StatelessWidget {
 
   void _openChatScreen(UserModel userModel) {
     Get.to(
-      () => ChatScreen(userModel),
+      () => ChatScreen(userModel.id),
       binding: GetBinding(),
-      // duration: Duration(milliseconds: 500),
+      duration: Duration(milliseconds: 500),
     );
   }
 }

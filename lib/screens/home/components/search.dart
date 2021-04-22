@@ -117,7 +117,7 @@ class Search extends SearchDelegate {
                 // showResults(context);
                 FocusScope.of(context).unfocus();
                 await Get.to(
-                  () => ChatScreen(suggestionsList[index]),
+                  () => ChatScreen(suggestionsList[index].id),
                   binding: GetBinding(),
                   duration: Duration(milliseconds: 1000),
                 );

@@ -13,6 +13,7 @@ class UserModel {
   int lastSeen;
   String bio;
   bool isMale;
+  String firebaseToken;
 
   UserModel(
     this.name,
@@ -25,6 +26,7 @@ class UserModel {
     this.lastSeen,
     this.isMale,
     this.bio,
+    this.firebaseToken,
   );
 
   UserModel.fromJson(dynamic map) {
@@ -38,6 +40,7 @@ class UserModel {
     countryCode = map["countryCode"];
     isMale = map["isMale"];
     bio = map["bio"];
+    firebaseToken = map["firebaseToken"];
   }
 
   String toUserString() {
@@ -46,7 +49,7 @@ class UserModel {
 
   UserModel.fromLocalStorage() {
     String userString = LocalStorage().getString(LocalStorage.user);
-    if(userString!=null) {
+    if (userString != null) {
       dynamic map = jsonDecode(userString);
       id = map["id"];
       name = map["name"];
@@ -57,6 +60,7 @@ class UserModel {
       imageUrl = map["imageUrl"];
       countryCode = map["countryCode"];
       bio = map["bio"];
+      firebaseToken = map["firebaseToken"];
       isMale = map["isMale"];
     }
   }
@@ -70,11 +74,11 @@ class UserModel {
     map["email"] = email;
     map["phone"] = phone;
     map["imageUrl"] = imageUrl;
+    map["firebaseToken"] = firebaseToken;
     map["countryCode"] = countryCode;
     map["bio"] = bio;
     map["isMale"] = isMale;
 
     return map;
   }
-
 }

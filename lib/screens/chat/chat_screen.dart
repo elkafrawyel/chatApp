@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:chat_app/api/firebase_api.dart';
 import 'package:chat_app/controllers/chat_controller.dart';
 import 'package:chat_app/data/super_message_model.dart';
 import 'package:chat_app/data/user_model.dart';
@@ -9,7 +8,6 @@ import 'package:chat_app/helper/static_values.dart';
 import 'package:chat_app/screens/profile/profile.dart';
 import 'package:chat_app/widgets/circular_image.dart';
 import 'package:chat_app/widgets/hero_tags.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,9 +17,9 @@ import 'components/messages_list_view.dart';
 import 'components/new_message_widget.dart';
 
 class ChatScreen extends StatefulWidget {
-  final UserModel userModel;
+  final String userId;
 
-  ChatScreen(this.userModel);
+  ChatScreen(this.userId);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -65,8 +63,9 @@ class _ChatScreenState extends State<ChatScreen> {
     if (chatController.userModel == null)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // executes after build
-        chatController.setUserModel(widget.userModel);
+        chatController.setUserId(widget.userId);
       });
+
     return Scaffold(
       appBar: _buildAppbar(),
       backgroundColor: Color(0xFFECEBEB),
@@ -105,9 +104,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   _buildAppbar() => AppBar(
         title: GetBuilder<ChatController>(
-          builder: (controller) => appBarTitle(controller.userModel == null
-              ? widget.userModel
-              : controller.userModel),
+          builder: (controller) => controller.userModel == null
+              ? CircularProgressIndicator(
+                  strokeWidth: 1,
+                )
+              : appBarTitle(controller.userModel),
         ),
         backgroundColor: StaticValues.appColor,
         titleSpacing: 0.0,

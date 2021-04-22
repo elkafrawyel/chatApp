@@ -18,8 +18,6 @@ class HomeController extends GetxController {
         // .where('isOnline', isEqualTo: true)
         .snapshots()
         .listen((dataSnapshot) async {
-
-      print('-->Users Doc is changed');
       allUsers = dataSnapshot.docs
           .map((document) => UserModel.fromJson(document.data()))
           .toList();
