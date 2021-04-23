@@ -21,7 +21,7 @@ class ReplyMessageWidget extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              color: Colors.green,
+              color: isMe ? Colors.green : Colors.white,
               width: 4,
             ),
             const SizedBox(width: 8),

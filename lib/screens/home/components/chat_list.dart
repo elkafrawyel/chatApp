@@ -5,6 +5,7 @@ import 'package:chat_app/screens/home/components/chat_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:chat_app/data/chat_room.dart';
 
 class ChatListView extends StatefulWidget {
   @override
@@ -14,7 +15,7 @@ class ChatListView extends StatefulWidget {
 class _ChatListViewState extends State<ChatListView> {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<SuperMessage>>(
+    return StreamBuilder<List<ChatRoom>>(
         stream: FirebaseApi.getMyChats(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -27,8 +28,8 @@ class _ChatListViewState extends State<ChatListView> {
             );
           } else {
             if (snapshot.hasData) {
-              final messages = snapshot.data;
-              return messages.length == 0
+              final chatRooms = snapshot.data;
+              return chatRooms.length == 0
                   ? Center(
                       child: Text(
                         'You Don\'t Have Any Recent Messages.',
@@ -39,20 +40,20 @@ class _ChatListViewState extends State<ChatListView> {
                   : Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ListView.separated(
-                        itemCount: messages.length,
+                        itemCount: chatRooms.length,
                         itemBuilder: (context, index) {
-                          final message = messages[index];
-                          final id =
-                              message.idFrom == UserModel.fromLocalStorage().id
-                                  ? message.idTo
-                                  : message.idFrom;
+                          final room = chatRooms[index];
+                          final id = room.lastMessage.idFrom ==
+                                  UserModel.fromLocalStorage().id
+                              ? room.lastMessage.idTo
+                              : room.lastMessage.idFrom;
                           return FutureBuilder<UserModel>(
                             future: FirebaseApi().getUserProfile(id: id),
                             builder: (context, snapshot) {
                               if (snapshot.data == null) {
                                 return SizedBox();
                               } else {
-                                return ChatCard(message, snapshot.data);
+                                return ChatCard(room, snapshot.data);
                               }
                             },
                           );

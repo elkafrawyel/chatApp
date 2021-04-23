@@ -16,7 +16,7 @@ import 'package:get/get.dart';
 import 'package:chat_app/widgets/hero_widget.dart';
 
 import 'components/messages_list_view.dart';
-import 'components/new_message_widget.dart';
+import 'components/send_message_widget.dart';
 
 class ChatScreen extends StatefulWidget {
   final String userId;
@@ -38,7 +38,6 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   void dispose() {
     _checker.cancel();
     Get.find<SettingsController>().setShowNotification(true);
-
     super.dispose();
   }
 
@@ -77,9 +76,6 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     if (chatController.userModel == null)
@@ -112,7 +108,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                         },
                       ),
                     ),
-                    NewMessageWidget(
+                    SendMessageWidget(
                       focusNode: focusNode,
                       onCancelReply: cancelReply,
                       replyMessage: replyMessage,
@@ -178,7 +174,9 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
               ),
               Text(
                 userModel.isOnline
-                    ? 'online'
+                    ? userModel.isTyping ?? false
+                        ? 'Typing...'
+                        : 'online'
                     : AppUtilies().timeAgoSinceDate(userModel.lastSeen),
                 style: Theme.of(context)
                     .textTheme

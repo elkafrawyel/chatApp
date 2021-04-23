@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_app/api/firebase_api.dart';
 import 'package:chat_app/controllers/chat_controller.dart';
 import 'package:chat_app/data/super_message_model.dart';
@@ -6,13 +8,14 @@ import 'package:chat_app/screens/chat/components/reply_message_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 
-class NewMessageWidget extends StatefulWidget {
+class SendMessageWidget extends StatefulWidget {
   final FocusNode focusNode;
   final SuperMessage replyMessage;
   final VoidCallback onCancelReply;
 
-  const NewMessageWidget({
+  const SendMessageWidget({
     @required this.focusNode,
     @required this.replyMessage,
     @required this.onCancelReply,
@@ -20,10 +23,10 @@ class NewMessageWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _NewMessageWidgetState createState() => _NewMessageWidgetState();
+  _SendMessageWidgetState createState() => _SendMessageWidgetState();
 }
 
-class _NewMessageWidgetState extends State<NewMessageWidget> {
+class _SendMessageWidgetState extends State<SendMessageWidget> {
   final _controller = TextEditingController();
   String message = '';
   final chatController = Get.find<ChatController>();
@@ -32,19 +35,40 @@ class _NewMessageWidgetState extends State<NewMessageWidget> {
   static final inputBottomRadius = Radius.circular(24);
 
   void sendMessage() async {
-    // FocusScope.of(context).unfocus();
     widget.onCancelReply();
-
+    FirebaseApi.isTyping(false);
     await FirebaseApi.uploadMessage(
         chatController.userModel.id, message, widget.replyMessage);
 
     _controller.clear();
   }
 
+  // @override
+  // void dispose() {
+  //   FirebaseApi.isTyping(false);
+  //   super.dispose();
+  // }
+
+  @override
+  void initState() {
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (bool visible) {
+        print(visible);
+
+        if (visible) {
+          FirebaseApi.isTyping(true);
+        } else {
+          widget.focusNode.unfocus();
+          FirebaseApi.isTyping(false);
+        }
+      },
+    );
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isReplying = widget.replyMessage != null;
-
     return Container(
       color: Colors.white,
       padding: EdgeInsets.all(8),
@@ -58,6 +82,7 @@ class _NewMessageWidgetState extends State<NewMessageWidget> {
                   focusNode: widget.focusNode,
                   controller: _controller,
                   textCapitalization: TextCapitalization.sentences,
+                  style: Theme.of(context).textTheme.bodyText1,
                   autocorrect: true,
                   enableSuggestions: true,
                   decoration: InputDecoration(

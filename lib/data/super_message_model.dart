@@ -1,10 +1,10 @@
-import 'package:chat_app/helper/Utilies.dart';
 import 'package:flutter/material.dart';
 
 class MessageField {
   static final String idMessage = 'idMessage';
   static final String message = 'message';
   static final String createdAt = 'createdAt';
+  static final String seen = 'seen';
 }
 
 class SuperMessage {
@@ -13,7 +13,9 @@ class SuperMessage {
   final String idFrom;
   final String message;
   final int createdAt;
+  final bool seen;
   final SuperMessage replyMessage;
+
 
   const SuperMessage({
     this.idMessage,
@@ -22,6 +24,7 @@ class SuperMessage {
     @required this.message,
     @required this.createdAt,
     @required this.replyMessage,
+    @required this.seen,
   });
 
   static SuperMessage fromJson(Map<String, dynamic> json) => SuperMessage(
@@ -33,6 +36,7 @@ class SuperMessage {
         replyMessage: json['replyMessage'] == null
             ? null
             : SuperMessage.fromJson(json['replyMessage']),
+        seen: json['seen'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -41,6 +45,7 @@ class SuperMessage {
         'idFrom': idFrom,
         'message': message,
         'createdAt': createdAt,
+        'seen': seen,
         'replyMessage': replyMessage == null ? null : replyMessage.toJson(),
       };
 }

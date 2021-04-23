@@ -176,7 +176,6 @@ class PushNotificationsManager {
         playSound: false,
         priority: Priority.high,
         showWhen: true,
-        channelShowBadge: true,
         autoCancel: true,
         enableVibration: false,
         sound: RawResourceAndroidNotificationSound('tone'),

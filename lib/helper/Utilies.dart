@@ -139,6 +139,15 @@ class AppUtilies {
           flag: 'src/images/flags/${e.key.toLowerCase()}.png'))
       .toList();
 
+  String getDateStringHhMmA(int time) {
+    var date = DateTime.fromMillisecondsSinceEpoch(time);
+    var formatter = DateFormat('hh:mm a');
+    // print(formatter.locale);
+    String formatted = formatter.format(date);
+    // print(formatted);
+    return formatted;
+  }
+
   static Map<String, String> countries = {
     "All": "All World",
     "AF": "Afghanistan",

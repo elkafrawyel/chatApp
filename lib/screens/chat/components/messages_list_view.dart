@@ -43,13 +43,9 @@ class _MessagesListState extends State<MessagesList> {
                     itemBuilder: (BuildContext context, int index) {
                       final message = controller.messagesList[index];
 
-                      // if (!message.seen &&
-                      //     message.idUser !=
-                      //         UserModel.fromLocalStorage().id) {
-                      //   // not seen and is not my message
-                      //   FirebaseApi()
-                      //       .seeSingleMessage(userId, message.id);
-                      // }
+                      if (message.seen == null ? false : !message.seen) {
+                        FirebaseApi().seeSingleMessage(message);
+                      }
                       return SwipeTo(
                         onRightSwipe: () => widget.onSwipedMessage(message),
                         child: MessageWidget(

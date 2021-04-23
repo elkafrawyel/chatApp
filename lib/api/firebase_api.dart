@@ -12,12 +12,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
+import 'package:chat_app/data/chat_room.dart';
 
 class FirebaseApi {
   FirebaseAuth _auth = FirebaseAuth.instance;
   final String userRef = 'Users';
   final String chatRef = 'Chat';
-  final String keyMessages = 'Messages';
   final String keyLastMessage = 'LastMessage';
   FirebaseFirestore _fireStore = FirebaseFirestore.instance;
   final UserModel me = UserModel.fromLocalStorage();
@@ -45,17 +45,21 @@ class FirebaseApi {
       String imageUrl = await imageReference.getDownloadURL();
       //update user profile and save it
       UserModel userModel = UserModel(
-          name,
-          imageUrl,
-          user.uid,
-          phone,
-          email,
-          countryCode,
-          true,
-          DateTime.now().millisecondsSinceEpoch,
-          isMale,
-          null,
-          null);
+        name,
+        imageUrl,
+        user.uid,
+        phone,
+        email,
+        countryCode,
+        true,
+        DateTime.now().millisecondsSinceEpoch,
+        isMale,
+        null,
+        null,
+        false,
+        false,
+        false,
+      );
 
       _fireStore.collection(userRef).doc(user.uid).set(userModel.toJson());
 
@@ -90,17 +94,21 @@ class FirebaseApi {
 
       //update user profile and save it
       UserModel userModel = UserModel(
-          name,
-          imageUrl == null ? currentUser.imageUrl : imageUrl,
-          currentUser.id,
-          phone,
-          email,
-          countryCode,
-          true,
-          DateTime.now().millisecondsSinceEpoch,
-          currentUser.isMale,
-          bio,
-          null);
+        name,
+        imageUrl == null ? currentUser.imageUrl : imageUrl,
+        currentUser.id,
+        phone,
+        email,
+        countryCode,
+        true,
+        DateTime.now().millisecondsSinceEpoch,
+        currentUser.isMale,
+        bio,
+        null,
+        false,
+        false,
+        false,
+      );
 
       _fireStore
           .collection(userRef)
@@ -183,7 +191,6 @@ class FirebaseApi {
   }
 
   void updateProfile(UserModel userModel) {
-    print('updating profile');
     final controller = Get.find<SettingsController>();
     if (_auth.currentUser == null)
       return null;
@@ -208,16 +215,43 @@ class FirebaseApi {
     }
   }
 
-  seeSingleMessage(String idUser, String messageId) async {
+  seeSingleMessage(SuperMessage message) async {
+    // في الحالة دي لازم اعرف انها مش بتاعي لان السين مشترك
+    bool myMessage = message.idFrom == me.id;
+    String chatRoom = _getChatRoom(message.idFrom);
+    if (myMessage) return;
+
     var document = await FirebaseFirestore.instance
-        .collection(keyMessages)
-        .doc(_getChatRoom(idUser))
-        .collection(keyMessages)
-        .doc(messageId)
+        .collection('chats')
+        .doc(chatRoom)
+        .collection('messages')
+        .doc(message.idMessage)
         .get();
-    // document.reference.update(<String, dynamic>{
-    //   SuperMessageFields.seen: true,
-    // });
+    document.reference.update(<String, dynamic>{
+      MessageField.seen: true,
+    });
+  }
+
+  static seeLastChatRoomMessage(SuperMessage message) async {
+    final refUsers = FirebaseFirestore.instance.collection('ChatRooms');
+
+    // جالي رسالة ومش بتاعي اقدر اعملها سين
+    bool myMessage = message.idFrom == UserModel.fromLocalStorage().id;
+
+    if (!myMessage) {
+      DocumentSnapshot snapshot = await refUsers
+          .doc(UserModel.fromLocalStorage().id)
+          .collection('rooms')
+          .doc(message.idFrom)
+          .get();
+
+      Map<String, dynamic> lastMessage = snapshot[ChatRoomFields.lastMessage];
+      lastMessage[ChatRoomFields.time] = true;
+      snapshot.reference.update({
+        ChatRoomFields.lastMessage: lastMessage,
+        ChatRoomFields.unSeenMessagesCount: 0
+      });
+    }
   }
 
   static Future uploadMessage(
@@ -231,41 +265,57 @@ class FirebaseApi {
       message: message,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       replyMessage: replyMessage,
+      seen: false,
     );
+
+    /// add message to chat rooms
     DocumentReference documentReference =
         await refMessages.add(newMessage.toJson());
 
     documentReference.update({MessageField.idMessage: documentReference.id});
 
     //save message into room doc for me and for him
-    final refUsers = FirebaseFirestore.instance.collection('ChatRooms');
+    final chatRoomUsers = FirebaseFirestore.instance.collection('ChatRooms');
 
-    await refUsers
+    /// add message to his chat room
+    /// get the last count and add new one as not seen
+    DocumentSnapshot documentSnapshot = await chatRoomUsers
         .doc(idUser)
         .collection('rooms')
         .doc(UserModel.fromLocalStorage().id)
-        .set({
-      'lastMessage': newMessage.toJson(),
-      'time': DateTime.now().millisecondsSinceEpoch
-    });
+        .get();
 
-    await refUsers
+    int count =
+        ChatRoom.fromJson(documentSnapshot.data()).unSeenMessagesCount ?? 0;
+    count++;
+    ChatRoom room = ChatRoom(
+        unSeenMessagesCount: count,
+        lastMessage: newMessage,
+        time: DateTime.now().millisecondsSinceEpoch);
+
+    await chatRoomUsers
+        .doc(idUser)
+        .collection('rooms')
+        .doc(UserModel.fromLocalStorage().id)
+        .set(room.toJson());
+
+    /// add message to my chat room
+    /// set count to 0 as i send the last message mean i saw all chat
+
+    ChatRoom room2 = ChatRoom(
+        unSeenMessagesCount: 0,
+        lastMessage: newMessage,
+        time: DateTime.now().millisecondsSinceEpoch);
+
+    await chatRoomUsers
         .doc(UserModel.fromLocalStorage().id)
         .collection('rooms')
         .doc(idUser)
-        .set({
-      'lastMessage': newMessage.toJson(),
-      'time': DateTime.now().millisecondsSinceEpoch
-    });
+        .set(room2.toJson());
 
     //send him a message
-
-
-    NotificationCenter().sendNotification(
-        idUser,
-        UserModel.fromLocalStorage().name,
-        message,
-        NotificationType.CHAT);
+    NotificationCenter().sendNotification(idUser,
+        UserModel.fromLocalStorage().name, message, NotificationType.CHAT);
   }
 
   static Stream<List<SuperMessage>> getMessagesStream(String idUser) =>
@@ -276,37 +326,29 @@ class FirebaseApi {
           .transform(
               AppUtilies.transformer((json) => SuperMessage.fromJson(json)));
 
-  // static Stream<List<SuperMessage>> getMessagesStream(String idUser) =>
-  //     FirebaseFirestore.instance
-  //         .collection('chats/${_getChatRoom(idUser)}/messages')
-  //         .orderBy(MessageField.createdAt, descending: true)
-  //         .snapshots()
-  //         .transform(AppUtilies.transformer(SuperMessage.fromJson));
-
-  static Future<QuerySnapshot> getMessages(String idUser, int limit) async =>
-      (await FirebaseFirestore.instance
-          .collection('chats/${_getChatRoom(idUser)}/messages')
-          .orderBy(MessageField.createdAt, descending: true)
-          .limit(limit)
-          .get());
-
-  static Future<QuerySnapshot> loadMoreMessages(
-          String idUser, int limit, DocumentSnapshot lastDocument) async =>
-      (await FirebaseFirestore.instance
-          .collection('chats/${_getChatRoom(idUser)}/messages')
-          .orderBy(MessageField.createdAt, descending: true)
-          .startAfterDocument(lastDocument)
-          .limit(limit)
-          .get());
-
-  static Stream<List<SuperMessage>> getMyChats() => FirebaseFirestore.instance
+  static Stream<List<ChatRoom>> getMyChats() => FirebaseFirestore.instance
       .collection('ChatRooms')
       .doc(UserModel.fromLocalStorage().id)
       .collection('rooms')
       .orderBy('time', descending: true)
       .snapshots()
-      .transform(AppUtilies.transformer(
-          (json) => SuperMessage.fromJson(json['lastMessage'])));
+      .transform(AppUtilies.transformer((json) => ChatRoom.fromJson(json)));
+
+  static isTyping(bool isTyping) async {
+    UserModel me = UserModel.fromLocalStorage();
+    DocumentSnapshot snapshot =
+        await FirebaseFirestore.instance.collection('Users').doc(me.id).get();
+
+    snapshot.reference.update({UserModelFields.isTyping: isTyping});
+  }
+
+  static isRecording(bool isRecording) async {
+    UserModel me = UserModel.fromLocalStorage();
+    DocumentSnapshot snapshot =
+        await FirebaseFirestore.instance.collection('Users').doc(me.id).get();
+
+    snapshot.reference.update({UserModelFields.isRecording: isRecording});
+  }
 
   /// =================== End chat messages ===================================
 

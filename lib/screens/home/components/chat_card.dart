@@ -1,3 +1,5 @@
+import 'package:chat_app/api/firebase_api.dart';
+import 'package:chat_app/data/chat_room.dart';
 import 'package:chat_app/data/super_message_model.dart';
 import 'package:chat_app/data/user_model.dart';
 import 'package:chat_app/helper/Utilies.dart';
@@ -11,12 +13,12 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 class ChatCard extends StatelessWidget {
-  final SuperMessage superMessage;
+  final ChatRoom chatRoom;
 
   ///user send message to me it can be from toId or fromId
   final UserModel messageSender;
 
-  ChatCard(this.superMessage, this.messageSender) {
+  ChatCard(this.chatRoom, this.messageSender) {
     initializeDateFormatting();
   }
 
@@ -25,6 +27,7 @@ class ChatCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         _openChatScreen(messageSender);
+        FirebaseApi.seeLastChatRoomMessage(chatRoom.lastMessage);
       },
       child: Padding(
         padding: const EdgeInsetsDirectional.only(start: 10, end: 5),
@@ -84,7 +87,15 @@ class ChatCard extends StatelessWidget {
                   children: [
                     Text(
                       messageSender.name,
-                      style: Theme.of(context).textTheme.bodyText1,
+                      style: chatRoom.lastMessage.idFrom ==
+                              UserModel.fromLocalStorage().id
+                          ? Theme.of(context).textTheme.caption
+                          : chatRoom.lastMessage.seen ?? false
+                              ? Theme.of(context).textTheme.button
+                              : Theme.of(context)
+                                  .textTheme
+                                  .subtitle1
+                                  .copyWith(fontWeight: FontWeight.bold),
                       maxLines: 1,
                       textAlign: TextAlign.start,
                       overflow: TextOverflow.ellipsis,
@@ -96,28 +107,68 @@ class ChatCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            superMessage.idFrom ==
+                            chatRoom.lastMessage.idFrom ==
                                     UserModel.fromLocalStorage().id
-                                ? 'You: ${superMessage.message}'
-                                : superMessage.message,
-                            style: Theme.of(context).textTheme.caption,
+                                ? 'You: ${chatRoom.lastMessage.message}'
+                                : chatRoom.lastMessage.message,
+                            style: chatRoom.lastMessage.idFrom ==
+                                    UserModel.fromLocalStorage().id
+                                ? Theme.of(context).textTheme.caption
+                                : chatRoom.lastMessage.seen ?? false
+                                    ? Theme.of(context).textTheme.button
+                                    : Theme.of(context)
+                                        .textTheme
+                                        .bodyText1
+                                        .copyWith(fontWeight: FontWeight.bold),
                             maxLines: 1,
                             textAlign: TextAlign.start,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        Text(
-                          getMessageTime(superMessage.createdAt),
-                          style: Theme.of(context).textTheme.caption,
-                          maxLines: 1,
-                          textAlign: TextAlign.start,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Visibility(
+                  visible: chatRoom.unSeenMessagesCount > 0 &&
+                      chatRoom.lastMessage.idFrom !=
+                          UserModel.fromLocalStorage().id &&
+                      !chatRoom.lastMessage.seen,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.red,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        chatRoom.unSeenMessagesCount.toString(),
+                        style: Theme.of(context).textTheme.bodyText1.copyWith(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  getMessageTime(chatRoom.lastMessage.createdAt),
+                  style: Theme.of(context).textTheme.caption,
+                  maxLines: 1,
+                  textAlign: TextAlign.start,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ],
         ),

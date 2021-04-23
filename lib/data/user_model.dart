@@ -2,6 +2,23 @@ import 'dart:convert';
 
 import 'package:chat_app/helper/local_storage.dart';
 
+class UserModelFields {
+  static String name = 'name';
+  static String imageUrl = 'imageUrl';
+  static String id = 'id';
+  static String phone = 'phone';
+  static String email = 'email';
+  static String countryCode = 'countryCode';
+  static String isOnline = 'isOnline';
+  static String isTyping = 'isTyping';
+  static String isRecording = 'isRecording';
+  static String isSending = 'isSending';
+  static String lastSeen = 'lastSeen';
+  static String bio = 'bio';
+  static String isMale = 'isMale';
+  static String firebaseToken = 'firebaseToken';
+}
+
 class UserModel {
   String name;
   String imageUrl;
@@ -10,6 +27,9 @@ class UserModel {
   String email;
   String countryCode;
   bool isOnline;
+  bool isTyping;
+  bool isRecording;
+  bool isSending;
   int lastSeen;
   String bio;
   bool isMale;
@@ -27,12 +47,18 @@ class UserModel {
     this.isMale,
     this.bio,
     this.firebaseToken,
+    this.isTyping,
+    this.isSending,
+    this.isRecording,
   );
 
   UserModel.fromJson(dynamic map) {
     id = map["id"];
     name = map["name"];
     isOnline = map["isOnline"];
+    isTyping = map["isTyping"];
+    isSending = map["isSending"];
+    isRecording = map["isRecording"];
     lastSeen = map["lastSeen"];
     phone = map["phone"];
     email = map["email"];
@@ -62,6 +88,9 @@ class UserModel {
       bio = map["bio"];
       firebaseToken = map["firebaseToken"];
       isMale = map["isMale"];
+      isRecording = map["isRecording"];
+      isSending = map["isSending"];
+      isTyping = map["isTyping"];
     }
   }
 
@@ -78,6 +107,9 @@ class UserModel {
     map["countryCode"] = countryCode;
     map["bio"] = bio;
     map["isMale"] = isMale;
+    map["isTyping"] = isTyping;
+    map["isSending"] = isSending;
+    map["isRecording"] = isRecording;
 
     return map;
   }
