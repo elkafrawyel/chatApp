@@ -139,7 +139,9 @@ class ChatCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Visibility(
-                  visible: chatRoom.unSeenMessagesCount > 0 &&
+                  visible: (chatRoom.unSeenMessagesCount == null
+                          ? false
+                          : chatRoom.unSeenMessagesCount > 0) &&
                       chatRoom.lastMessage.idFrom !=
                           UserModel.fromLocalStorage().id &&
                       !chatRoom.lastMessage.seen,

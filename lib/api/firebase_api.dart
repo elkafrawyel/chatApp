@@ -31,7 +31,7 @@ class FirebaseApi {
     String countryCode,
     File userImage,
   ) async {
-    print('signing up');
+    ('signing up');
 
     try {
       await _auth.createUserWithEmailAndPassword(
@@ -41,7 +41,7 @@ class FirebaseApi {
       Reference imageReference =
           FirebaseStorage.instance.ref('profile/user_${user.uid}');
       UploadTask uploadTask = imageReference.putFile(userImage);
-      await uploadTask.whenComplete(() => print('Photo upload done'));
+      await uploadTask.whenComplete(() => ('Photo upload done'));
       String imageUrl = await imageReference.getDownloadURL();
       //update user profile and save it
       UserModel userModel = UserModel(
@@ -63,7 +63,7 @@ class FirebaseApi {
 
       _fireStore.collection(userRef).doc(user.uid).set(userModel.toJson());
 
-      print('You have new account');
+      ('You have new account');
       return userModel;
     } on FirebaseAuthException catch (e) {
       _handleFirebaseError(e);
@@ -79,7 +79,7 @@ class FirebaseApi {
     String bio,
     File userImage,
   ) async {
-    print('changing profile');
+    ('changing profile');
 
     try {
       UserModel currentUser = UserModel.fromLocalStorage();
@@ -88,7 +88,7 @@ class FirebaseApi {
         Reference imageReference =
             FirebaseStorage.instance.ref('profile/user_${currentUser.id}');
         UploadTask uploadTask = imageReference.putFile(userImage);
-        await uploadTask.whenComplete(() => print('Photo upload done'));
+        await uploadTask.whenComplete(() => ('Photo upload done'));
         imageUrl = await imageReference.getDownloadURL();
       }
 
@@ -115,7 +115,7 @@ class FirebaseApi {
           .doc(currentUser.id)
           .update(userModel.toJson());
 
-      print('You account has changed');
+      ('You account has changed');
       return userModel;
     } on FirebaseAuthException catch (e) {
       _handleFirebaseError(e);
@@ -124,7 +124,7 @@ class FirebaseApi {
   }
 
   Future<UserModel> login(String email, String password) async {
-    print('logging in');
+    ('logging in');
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       User user = _auth.currentUser;
@@ -138,7 +138,7 @@ class FirebaseApi {
   }
 
   Future<UserModel> getUserProfile({String id}) async {
-    print('getting profile');
+    ('getting profile');
 
     if (id == null) {
       if (_auth.currentUser == null)
@@ -157,7 +157,7 @@ class FirebaseApi {
   }
 
   void setUserOnlineState(bool isOnline) {
-    print('change online state to $isOnline');
+    ('change online state to $isOnline');
     final controller = Get.find<SettingsController>();
     if (_auth.currentUser == null || controller.userModel == null)
       return null;
@@ -246,7 +246,7 @@ class FirebaseApi {
           .get();
 
       Map<String, dynamic> lastMessage = snapshot[ChatRoomFields.lastMessage];
-      lastMessage[ChatRoomFields.time] = true;
+      lastMessage['seen'] = true;
       snapshot.reference.update({
         ChatRoomFields.lastMessage: lastMessage,
         ChatRoomFields.unSeenMessagesCount: 0
@@ -266,6 +266,7 @@ class FirebaseApi {
       createdAt: DateTime.now().millisecondsSinceEpoch,
       replyMessage: replyMessage,
       seen: false,
+      translatedMessage: null,
     );
 
     /// add message to chat rooms
@@ -285,9 +286,13 @@ class FirebaseApi {
         .doc(UserModel.fromLocalStorage().id)
         .get();
 
-    int count =
-        ChatRoom.fromJson(documentSnapshot.data()).unSeenMessagesCount ?? 0;
-    count++;
+    int count = 0;
+
+    if (documentSnapshot.data() != null) {
+      count = ChatRoom.fromJson(documentSnapshot.data()).unSeenMessagesCount;
+      if (count != null) count++;
+    }
+
     ChatRoom room = ChatRoom(
         unSeenMessagesCount: count,
         lastMessage: newMessage,
@@ -350,10 +355,21 @@ class FirebaseApi {
     snapshot.reference.update({UserModelFields.isRecording: isRecording});
   }
 
+  static saveTranslatedMessage(
+      SuperMessage message, String translatedText) async {
+    final refMessages = FirebaseFirestore.instance
+        .collection('chats/${_getChatRoom(message.idFrom)}/messages');
+
+    DocumentSnapshot documentSnapshot =
+        await refMessages.doc(message.idMessage).get();
+    documentSnapshot.reference
+        .update({MessageField.translatedMessage: translatedText});
+  }
+
   /// =================== End chat messages ===================================
 
   void _handleFirebaseError(FirebaseAuthException e) {
-    print(e.code);
+    (e.code);
     bool isArabic = false;
     var errorMessage;
     switch (e.code) {

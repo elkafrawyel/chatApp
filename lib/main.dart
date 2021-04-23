@@ -26,7 +26,7 @@ void main() async {
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if(!Platform.isIOS){
-    print("Handling a background message: ${message.messageId}");
+    ("Handling a background message: ${message.messageId}");
     PushNotificationsManager().handleBackGroundMessage(message);
   }
 }

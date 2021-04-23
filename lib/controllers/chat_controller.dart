@@ -17,7 +17,6 @@ class ChatController extends GetxController {
 
   setUserId(String userId) {
     FirebaseApi.singleUserStream(userId).listen((snapshot) {
-      print(snapshot.data().toString());
       _userModel = UserModel.fromJson(snapshot.data());
       update();
       FirebaseApi.getMessagesStream(_userModel.id).listen((messages) {

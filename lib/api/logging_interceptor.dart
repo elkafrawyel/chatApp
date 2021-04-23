@@ -5,19 +5,19 @@ class LoggingInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    print("<-- HTTP -->");
-    print("--> ${options.headers}");
-    print("--> ${options.data.toString()}");
-    print("--> ${options.method}");
-    print("--> ${options.path}");
-    print("--> ${options.contentType}");
-    print("<-- END HTTP -->");
+    ("<-- HTTP -->");
+    ("--> ${options.headers}");
+    ("--> ${options.data.toString()}");
+    ("--> ${options.method}");
+    ("--> ${options.path}");
+    ("--> ${options.contentType}");
+    ("<-- END HTTP -->");
     super.onRequest(options, handler);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    print(
+    (
         "<-- ${response.statusCode} ${response.requestOptions.method} ${response.requestOptions.path}");
     String responseAsString = response.data.toString();
     if (responseAsString.length > _maxCharactersPerLine) {
@@ -28,22 +28,22 @@ class LoggingInterceptor extends Interceptor {
         if (endingIndex > responseAsString.length) {
           endingIndex = responseAsString.length;
         }
-        print(
+        (
             responseAsString.substring(i * _maxCharactersPerLine, endingIndex));
       }
     } else {
-      print(response.data);
+      (response.data);
     }
 
-    print("<-- END HTTP");
+    ("<-- END HTTP");
 
     return super.onResponse(response, handler);
   }
 
   @override
   void onError(DioError err, ErrorInterceptorHandler handler) {
-    print("<-- Error -->");
-    print(err.error);
+    ("<-- Error -->");
+    (err.error);
     print(err.message);
     super.onError(err, handler);
   }

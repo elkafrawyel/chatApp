@@ -34,10 +34,11 @@ class ReplyMessageWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Expanded(
                 child: Text(
-                  '${user.name}',
+                  '${message.idFrom == user.id ? user.name : UserModel.fromLocalStorage().name}',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: isMe ? Colors.black54 : Colors.white),

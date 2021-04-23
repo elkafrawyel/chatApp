@@ -36,11 +36,10 @@ class _SendMessageWidgetState extends State<SendMessageWidget> {
 
   void sendMessage() async {
     widget.onCancelReply();
+    _controller.clear();
     FirebaseApi.isTyping(false);
     await FirebaseApi.uploadMessage(
         chatController.userModel.id, message, widget.replyMessage);
-
-    _controller.clear();
   }
 
   // @override
@@ -53,8 +52,6 @@ class _SendMessageWidgetState extends State<SendMessageWidget> {
   void initState() {
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
-        print(visible);
-
         if (visible) {
           FirebaseApi.isTyping(true);
         } else {
