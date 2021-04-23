@@ -1,11 +1,10 @@
 import 'package:chat_app/api/firebase_api.dart';
 import 'package:chat_app/controllers/chat_controller.dart';
 import 'package:chat_app/data/super_message_model.dart';
-import 'package:chat_app/data/user_model.dart';
 import 'package:chat_app/helper/static_values.dart';
+import 'package:chat_app/screens/chat/components/reply_message_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'file:///D:/Work/Apps/chat_app/lib/screens/chat/components/reply_message_widget.dart';
 import 'package:get/get.dart';
 
 class NewMessageWidget extends StatefulWidget {
