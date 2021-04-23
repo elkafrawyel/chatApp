@@ -29,7 +29,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
+
+    homeController.getUsers();
+
     _checker = DataConnectionChecker().onStatusChange.listen((event) {
       switch (event) {
         case DataConnectionStatus.connected:
@@ -80,18 +82,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
   }
 
-  @override
-  void didChangeDependencies() {
-    homeController.getUsers();
-    super.didChangeDependencies();
-  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       //set status to online here in fireStore
-      FirebaseApi().setUserOnlineState(true);
       Get.find<SettingsController>().setShowNotification(false);
+      FirebaseApi().setUserOnlineState(true);
 
     } else {
       // set status to offline here in fireStore

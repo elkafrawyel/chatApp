@@ -3,7 +3,6 @@ import 'package:chat_app/helper/get_binding.dart';
 import 'package:chat_app/helper/static_values.dart';
 import 'package:chat_app/screens/auth/register.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -12,6 +11,7 @@ class LoginScreen extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,17 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Image.asset('src/images/logo.png'),
+                    SizedBox(
+                      height: 60,
+                    ),
+                    Image.asset(
+                      'src/images/splash_logo.png',
+                      width: 120,
+                      height: 120,
+                    ),
+                    SizedBox(
+                      height: 40,
+                    ),
                     _emailField(),
                     SizedBox(
                       height: 20,

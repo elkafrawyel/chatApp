@@ -28,34 +28,41 @@ class _ChatListViewState extends State<ChatListView> {
           } else {
             if (snapshot.hasData) {
               final messages = snapshot.data;
-
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListView.separated(
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final id =
-                    message.idFrom == UserModel.fromLocalStorage().id
-                        ? message.idTo
-                        : message.idFrom;
-                    return FutureBuilder<UserModel>(
-                      future: FirebaseApi().getUserProfile(id: id),
-                      builder: (context, snapshot) {
-                        if(snapshot.data == null){
-                          return SizedBox();
-                        }else{
-                          return ChatCard(message, snapshot.data);
-                        }
-                      },
-                    );
-                  },
-                  separatorBuilder: (BuildContext context, int index) =>
-                      SizedBox(
-                        height: 20,
+              return messages.length == 0
+                  ? Center(
+                      child: Text(
+                        'You Don\'t Have Any Recent Messages.',
+                        maxLines: 2,
+                        style: Theme.of(context).textTheme.bodyText1,
                       ),
-                ),
-              );
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ListView.separated(
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[index];
+                          final id =
+                              message.idFrom == UserModel.fromLocalStorage().id
+                                  ? message.idTo
+                                  : message.idFrom;
+                          return FutureBuilder<UserModel>(
+                            future: FirebaseApi().getUserProfile(id: id),
+                            builder: (context, snapshot) {
+                              if (snapshot.data == null) {
+                                return SizedBox();
+                              } else {
+                                return ChatCard(message, snapshot.data);
+                              }
+                            },
+                          );
+                        },
+                        separatorBuilder: (BuildContext context, int index) =>
+                            SizedBox(
+                          height: 20,
+                        ),
+                      ),
+                    );
             } else {
               return SizedBox();
             }

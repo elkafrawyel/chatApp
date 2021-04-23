@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chat_app/api/firebase_api.dart';
 import 'package:chat_app/helper/get_binding.dart';
 import 'package:chat_app/helper/local_storage.dart';
@@ -23,8 +25,10 @@ void main() async {
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("Handling a background message: ${message.messageId}");
-  PushNotificationsManager().handleBackGroundMessage(message);
+  if(!Platform.isIOS){
+    print("Handling a background message: ${message.messageId}");
+    PushNotificationsManager().handleBackGroundMessage(message);
+  }
 }
 
 class MyApp extends StatelessWidget {

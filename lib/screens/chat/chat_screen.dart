@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:chat_app/api/firebase_api.dart';
 import 'package:chat_app/controllers/chat_controller.dart';
+import 'package:chat_app/controllers/settings_controller.dart';
 import 'package:chat_app/data/super_message_model.dart';
 import 'package:chat_app/data/user_model.dart';
 import 'package:chat_app/helper/Utilies.dart';
@@ -25,7 +27,7 @@ class ChatScreen extends StatefulWidget {
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   SuperMessage replyMessage;
   final focusNode = FocusNode();
   bool isOnline = true;
@@ -35,11 +37,15 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _checker.cancel();
+    Get.find<SettingsController>().setShowNotification(true);
+
     super.dispose();
   }
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
+
     _checker = DataConnectionChecker().onStatusChange.listen((event) {
       switch (event) {
         case DataConnectionStatus.connected:
@@ -57,6 +63,22 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     super.initState();
   }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      //set status to online here in fireStore
+      FirebaseApi().setUserOnlineState(true);
+      Get.find<SettingsController>().setShowNotification(false);
+    } else {
+      // set status to offline here in fireStore
+      FirebaseApi().setUserOnlineState(false);
+      Get.find<SettingsController>().setShowNotification(true);
+    }
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {

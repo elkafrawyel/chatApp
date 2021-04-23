@@ -1,13 +1,11 @@
 import 'dart:io';
 
 import 'package:chat_app/controllers/register_controller.dart';
-import 'package:chat_app/data/country_model.dart';
 import 'package:chat_app/helper/static_values.dart';
 import 'package:chat_app/widgets/register_countries_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:images_picker/images_picker.dart';
-import 'package:searchable_dropdown/searchable_dropdown.dart';
 
 class RegisterScreen extends StatelessWidget {
   final controller = Get.find<RegisterController>();

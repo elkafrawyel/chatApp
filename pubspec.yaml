@@ -60,7 +60,8 @@ dependencies:
   url_launcher:
   #  swipe to reply messages
   swipe_to: ^0.0.1+6
-
+#  sound player
+  audioplayers: ^0.18.3
   #  network
   dio: ^4.0.0
   #  icon

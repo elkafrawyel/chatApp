@@ -1,12 +1,11 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_app/data/country_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class AppUtilies {
-
-
   static DateTime toDateTime(value) {
     if (value == null) return null;
 
@@ -26,7 +25,7 @@ class AppUtilies {
   }
 
   static StreamTransformer transformer<T>(
-      T Function(Map<String, dynamic> json) fromJson) =>
+          T Function(Map<String, dynamic> json) fromJson) =>
       StreamTransformer<QuerySnapshot, List<T>>.fromHandlers(
         handleData: (QuerySnapshot data, EventSink<List<T>> sink) {
           final snaps = data.docs.map((doc) => doc.data()).toList();
@@ -393,4 +392,11 @@ class AppUtilies {
     "SS": "South Sudan",
     "XK": "Kosovo"
   };
+
+  static void playSound() async {
+    await AudioPlayer().play(
+        'https://firebasestorage.googleapis.com/v0/b/dating-app-5459a.appspot.com/o/sounds%2Ftone.mp3?alt=media&token=457e2e93-66b2-4b21-b048-041c96fc2bdf',
+        isLocal: false,
+        volume: 10);
+  }
 }

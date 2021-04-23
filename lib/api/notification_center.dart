@@ -45,11 +45,13 @@ class NotificationCenter {
 
       if (firebaseToken == null) return;
       Response response = await (await _getDioClient()).post("/send", data: {
+        /// this is optional - used to send to one device
         'to': firebaseToken,
         'notification': {
           'title': title,
           'body': body,
           'priority': 'high',
+          'sound': 'tone',
         },
         'data': {
           "click_action": "FLUTTER_NOTIFICATION_CLICK",
