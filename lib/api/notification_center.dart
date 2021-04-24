@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:chat_app/data/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'logging_interceptor.dart';
 

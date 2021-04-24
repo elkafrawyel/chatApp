@@ -1,12 +1,6 @@
-import 'package:chat_app/controllers/settings_controller.dart';
-import 'package:chat_app/data/user_model.dart';
 import 'package:chat_app/helper/static_values.dart';
 import 'package:chat_app/screens/home/components/search.dart';
-import 'package:chat_app/screens/home/components/search_view.dart';
-import 'package:chat_app/screens/profile/profile.dart';
-import 'package:chat_app/widgets/circular_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class AppBarWidget extends StatelessWidget {
   final bool silverCollapsed;

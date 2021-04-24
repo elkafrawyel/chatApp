@@ -9,16 +9,16 @@ class MessageField {
 }
 
 class SuperMessage {
-  final String idMessage;
-  final String idTo;
-  final String idFrom;
-  final String message;
-  final String translatedMessage;
-  final int createdAt;
-  final bool seen;
-  final SuperMessage replyMessage;
+  String idMessage;
+  String idTo;
+  String idFrom;
+  String message;
+  String translatedMessage;
+  int createdAt;
+  bool seen;
+  SuperMessage replyMessage;
 
-  const SuperMessage({
+  SuperMessage({
     this.idMessage,
     @required this.idTo,
     @required this.idFrom,

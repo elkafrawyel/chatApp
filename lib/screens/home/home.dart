@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:chat_app/api/notification_center.dart';
 import 'package:chat_app/helper/static_values.dart';
 import 'package:chat_app/screens/home/components/drawer.dart';
 import 'package:chat_app/api/firebase_api.dart';

@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:chat_app/api/firebase_api.dart';
 import 'package:chat_app/controllers/chat_controller.dart';

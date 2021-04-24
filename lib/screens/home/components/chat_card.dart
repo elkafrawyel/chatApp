@@ -1,9 +1,9 @@
 import 'package:chat_app/api/firebase_api.dart';
 import 'package:chat_app/data/chat_room.dart';
-import 'package:chat_app/data/super_message_model.dart';
 import 'package:chat_app/data/user_model.dart';
 import 'package:chat_app/helper/Utilies.dart';
 import 'package:chat_app/helper/get_binding.dart';
+import 'package:chat_app/helper/static_values.dart';
 import 'package:chat_app/screens/chat/chat_screen.dart';
 import 'package:chat_app/widgets/circular_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -148,7 +148,7 @@ class ChatCard extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.red,
+                      color: StaticValues.appColor,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),

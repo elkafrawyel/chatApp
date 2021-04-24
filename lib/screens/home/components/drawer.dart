@@ -1,9 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/controllers/home_controller.dart';
-import 'package:chat_app/controllers/settings_controller.dart';
 import 'package:chat_app/data/user_model.dart';
 import 'package:chat_app/helper/get_binding.dart';
-import 'package:chat_app/helper/local_storage.dart';
 import 'package:chat_app/screens/profile/profile.dart';
 import 'package:chat_app/widgets/hero_widget.dart';
 import 'package:flutter/material.dart';

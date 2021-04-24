@@ -18,7 +18,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await GetStorage.init();
-  await PushNotificationsManager().init();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(MyApp());
@@ -26,7 +25,7 @@ void main() async {
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if(!Platform.isIOS){
-    ("Handling a background message: ${message.messageId}");
+    print("Handling a background message: ${message.messageId}");
     PushNotificationsManager().handleBackGroundMessage(message);
   }
 }

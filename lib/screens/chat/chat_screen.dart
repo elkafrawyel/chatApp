@@ -37,6 +37,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     _checker.cancel();
+    FirebaseApi.closeChatRoom(chatController.userModel.id);
     Get.find<SettingsController>().setShowNotification(true);
     super.dispose();
   }
@@ -44,6 +45,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    Get.find<SettingsController>().setShowNotification(false);
 
     _checker = DataConnectionChecker().onStatusChange.listen((event) {
       switch (event) {
@@ -69,9 +71,11 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
       //set status to online here in fireStore
       FirebaseApi().setUserOnlineState(true);
       Get.find<SettingsController>().setShowNotification(false);
+      FirebaseApi.openChatRoom(chatController.userModel.id);
     } else {
       // set status to offline here in fireStore
       FirebaseApi().setUserOnlineState(false);
+      FirebaseApi.closeChatRoom(chatController.userModel.id);
       Get.find<SettingsController>().setShowNotification(true);
     }
   }

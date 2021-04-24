@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_app/api/firebase_api.dart';
-import 'package:chat_app/controllers/chat_controller.dart';
 import 'package:chat_app/controllers/settings_controller.dart';
 import 'package:chat_app/helper/Utilies.dart';
 import 'package:chat_app/helper/get_binding.dart';
@@ -11,7 +9,6 @@ import 'package:chat_app/screens/chat/chat_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:get/get.dart';
 
 class PushNotificationsManager {
@@ -28,12 +25,18 @@ class PushNotificationsManager {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+  bool _showNotification = true;
 
   Future<void> init() async {
     _firebaseMessaging.getToken().then((token) {
       print('token:$token');
       //save token to user doc
       FirebaseApi.setFirebaseToken(token);
+    });
+
+    Get.find<SettingsController>().showNotification.stream.listen((event) {
+      _showNotification = event;
+      print('---------->Notification is $event ------------>');
     });
 
     if (!_initialized) {
@@ -59,7 +62,7 @@ class PushNotificationsManager {
           macOS: initializationSettingsMacOS);
 
       if (Platform.isIOS) {
-        final bool result = await _localNotificationsPlugin
+        await _localNotificationsPlugin
             .resolvePlatformSpecificImplementation<
                 IOSFlutterLocalNotificationsPlugin>()
             ?.requestPermissions(
@@ -70,7 +73,7 @@ class PushNotificationsManager {
       }
 
       if (Platform.isMacOS) {
-        final bool result = await _localNotificationsPlugin
+        await _localNotificationsPlugin
             .resolvePlatformSpecificImplementation<
                 MacOSFlutterLocalNotificationsPlugin>()
             ?.requestPermissions(
@@ -156,7 +159,8 @@ class PushNotificationsManager {
   void showNotification(RemoteMessage message) async {
     //if chat and user is in chat screen no notifications allowed
     //and allow to show notification
-    if (Get.find<SettingsController>().showNotification) {
+
+    if (_showNotification) {
       String title = message.notification.title;
       String body = message.notification.body;
       String payload = json.encode(message.data);

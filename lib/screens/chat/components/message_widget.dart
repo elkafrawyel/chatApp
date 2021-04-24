@@ -6,7 +6,6 @@ import 'package:chat_app/widgets/circular_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:get/get.dart';
-import 'package:translator/translator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:chat_app/screens/chat/components/reply_message_widget.dart';
 import 'package:chat_app/api/translate_api.dart';

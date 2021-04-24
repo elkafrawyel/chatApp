@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:animate_do/animate_do.dart';
-import 'package:chat_app/api/firebase_api.dart';
 import 'package:chat_app/data/user_model.dart';
 import 'package:chat_app/helper/static_values.dart';
 import 'package:flutter/material.dart';

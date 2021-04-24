@@ -1,5 +1,4 @@
 import 'package:chat_app/api/firebase_api.dart';
-import 'package:chat_app/data/super_message_model.dart';
 import 'package:chat_app/data/user_model.dart';
 import 'package:chat_app/screens/home/components/chat_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -47,13 +46,13 @@ class _ChatListViewState extends State<ChatListView> {
                                   UserModel.fromLocalStorage().id
                               ? room.lastMessage.idTo
                               : room.lastMessage.idFrom;
-                          return FutureBuilder<UserModel>(
-                            future: FirebaseApi().getUserProfile(id: id),
+                          return StreamBuilder<DocumentSnapshot>(
+                            stream: FirebaseApi.getUserStream(id),
                             builder: (context, snapshot) {
                               if (snapshot.data == null) {
                                 return SizedBox();
                               } else {
-                                return ChatCard(room, snapshot.data);
+                                return ChatCard(room, UserModel.fromJson(snapshot.data.data()));
                               }
                             },
                           );

@@ -31,7 +31,7 @@ class FirebaseApi {
     String countryCode,
     File userImage,
   ) async {
-    ('signing up');
+    print('signing up');
 
     try {
       await _auth.createUserWithEmailAndPassword(
@@ -63,7 +63,7 @@ class FirebaseApi {
 
       _fireStore.collection(userRef).doc(user.uid).set(userModel.toJson());
 
-      ('You have new account');
+      print('You have new account');
       return userModel;
     } on FirebaseAuthException catch (e) {
       _handleFirebaseError(e);
@@ -79,7 +79,7 @@ class FirebaseApi {
     String bio,
     File userImage,
   ) async {
-    ('changing profile');
+    print('changing profile');
 
     try {
       UserModel currentUser = UserModel.fromLocalStorage();
@@ -115,7 +115,7 @@ class FirebaseApi {
           .doc(currentUser.id)
           .update(userModel.toJson());
 
-      ('You account has changed');
+      print('You account has changed');
       return userModel;
     } on FirebaseAuthException catch (e) {
       _handleFirebaseError(e);
@@ -124,7 +124,7 @@ class FirebaseApi {
   }
 
   Future<UserModel> login(String email, String password) async {
-    ('logging in');
+    print('logging in');
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       User user = _auth.currentUser;
@@ -138,7 +138,7 @@ class FirebaseApi {
   }
 
   Future<UserModel> getUserProfile({String id}) async {
-    ('getting profile');
+    print('getting profile');
 
     if (id == null) {
       if (_auth.currentUser == null)
@@ -156,8 +156,12 @@ class FirebaseApi {
     }
   }
 
+  static Stream<DocumentSnapshot> getUserStream(String id) {
+    return FirebaseFirestore.instance.collection('Users').doc(id).snapshots();
+  }
+
   void setUserOnlineState(bool isOnline) {
-    ('change online state to $isOnline');
+    print('change online state to $isOnline');
     final controller = Get.find<SettingsController>();
     if (_auth.currentUser == null || controller.userModel == null)
       return null;
@@ -249,9 +253,48 @@ class FirebaseApi {
       lastMessage['seen'] = true;
       snapshot.reference.update({
         ChatRoomFields.lastMessage: lastMessage,
-        ChatRoomFields.unSeenMessagesCount: 0
+        ChatRoomFields.unSeenMessagesCount: 0,
+        ChatRoomFields.opened: true
       });
     }
+  }
+
+  //user i chat with
+  static closeChatRoom(String userId) async {
+    final refUsers = FirebaseFirestore.instance.collection('ChatRooms');
+
+    DocumentSnapshot snapshot = await refUsers
+        .doc(UserModel.fromLocalStorage().id)
+        .collection('rooms')
+        .doc(userId)
+        .get();
+
+    Map<String, dynamic> lastMessage = snapshot[ChatRoomFields.lastMessage];
+    lastMessage['seen'] = true;
+    snapshot.reference.update({
+      ChatRoomFields.lastMessage: lastMessage,
+      ChatRoomFields.unSeenMessagesCount: 0,
+      ChatRoomFields.opened: false
+    });
+  }
+
+  //user i chat with
+  static openChatRoom(String userId) async {
+    final refUsers = FirebaseFirestore.instance.collection('ChatRooms');
+
+    DocumentSnapshot snapshot = await refUsers
+        .doc(UserModel.fromLocalStorage().id)
+        .collection('rooms')
+        .doc(userId)
+        .get();
+
+    Map<String, dynamic> lastMessage = snapshot[ChatRoomFields.lastMessage];
+    lastMessage['seen'] = true;
+    snapshot.reference.update({
+      ChatRoomFields.lastMessage: lastMessage,
+      ChatRoomFields.unSeenMessagesCount: 0,
+      ChatRoomFields.opened: true
+    });
   }
 
   static Future uploadMessage(
@@ -275,48 +318,72 @@ class FirebaseApi {
 
     documentReference.update({MessageField.idMessage: documentReference.id});
 
-    //save message into room doc for me and for him
-    final chatRoomUsers = FirebaseFirestore.instance.collection('ChatRooms');
+    ///save message into room doc for me and for him
+    final chatRoomReference =
+        FirebaseFirestore.instance.collection('ChatRooms');
+
+    /// add message to my chat room
+    /// set count to 0 as i send the last message mean i saw all chat and open chat
+
+    newMessage.seen = true;
+    ChatRoom myChatRoom = ChatRoom(
+        unSeenMessagesCount: 0,
+        lastMessage: newMessage,
+        time: DateTime.now().millisecondsSinceEpoch,
+        opened: true);
+
+    await chatRoomReference
+        .doc(UserModel.fromLocalStorage().id)
+        .collection('rooms')
+        .doc(idUser)
+        .set(myChatRoom.toJson());
 
     /// add message to his chat room
     /// get the last count and add new one as not seen
-    DocumentSnapshot documentSnapshot = await chatRoomUsers
+    DocumentSnapshot documentSnapshot = await chatRoomReference
         .doc(idUser)
         .collection('rooms')
         .doc(UserModel.fromLocalStorage().id)
         .get();
 
-    int count = 0;
-
     if (documentSnapshot.data() != null) {
-      count = ChatRoom.fromJson(documentSnapshot.data()).unSeenMessagesCount;
-      if (count != null) count++;
+      ChatRoom hisRoom = ChatRoom.fromJson(documentSnapshot.data());
+      int count = 0;
+
+      if (!hisRoom.opened ?? false) {
+        count = hisRoom.unSeenMessagesCount;
+        if (count != null) count++;
+
+        newMessage.seen = false;
+      } else {
+        newMessage.seen = true;
+      }
+
+      ChatRoom room = ChatRoom(
+          unSeenMessagesCount: count,
+          lastMessage: newMessage,
+          time: DateTime.now().millisecondsSinceEpoch,
+          opened: hisRoom.opened);
+
+      await chatRoomReference
+          .doc(idUser)
+          .collection('rooms')
+          .doc(UserModel.fromLocalStorage().id)
+          .set(room.toJson());
+    } else {
+      print('<-----------------First Chat Room Created------------>');
+      ChatRoom room = ChatRoom(
+          unSeenMessagesCount: 1,
+          lastMessage: newMessage,
+          time: DateTime.now().millisecondsSinceEpoch,
+          opened: false);
+
+      await chatRoomReference
+          .doc(idUser)
+          .collection('rooms')
+          .doc(UserModel.fromLocalStorage().id)
+          .set(room.toJson());
     }
-
-    ChatRoom room = ChatRoom(
-        unSeenMessagesCount: count,
-        lastMessage: newMessage,
-        time: DateTime.now().millisecondsSinceEpoch);
-
-    await chatRoomUsers
-        .doc(idUser)
-        .collection('rooms')
-        .doc(UserModel.fromLocalStorage().id)
-        .set(room.toJson());
-
-    /// add message to my chat room
-    /// set count to 0 as i send the last message mean i saw all chat
-
-    ChatRoom room2 = ChatRoom(
-        unSeenMessagesCount: 0,
-        lastMessage: newMessage,
-        time: DateTime.now().millisecondsSinceEpoch);
-
-    await chatRoomUsers
-        .doc(UserModel.fromLocalStorage().id)
-        .collection('rooms')
-        .doc(idUser)
-        .set(room2.toJson());
 
     //send him a message
     NotificationCenter().sendNotification(idUser,
@@ -369,7 +436,7 @@ class FirebaseApi {
   /// =================== End chat messages ===================================
 
   void _handleFirebaseError(FirebaseAuthException e) {
-    (e.code);
+    print(e.code);
     bool isArabic = false;
     var errorMessage;
     switch (e.code) {

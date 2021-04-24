@@ -1,12 +1,13 @@
 import 'package:chat_app/api/firebase_api.dart';
 import 'package:chat_app/data/user_model.dart';
 import 'package:chat_app/helper/local_storage.dart';
+import 'package:chat_app/helper/push_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SettingsController extends GetxController {
   UserModel userModel;
-  bool showNotification = true;
+  RxBool showNotification = true.obs;
   bool isDarkMode = LocalStorage().getBool(LocalStorage.darkMode);
 
   @override
@@ -17,13 +18,14 @@ class SettingsController extends GetxController {
       FirebaseApi().setUserOnlineState(true);
     }
     setTheme();
+
+    await PushNotificationsManager().init();
+
     super.onInit();
   }
 
   setShowNotification(bool show) {
-    print('---->Show notification $show');
-    showNotification = show;
-    update();
+    showNotification.value = show;
   }
 
   void setUser(UserModel userModel) {

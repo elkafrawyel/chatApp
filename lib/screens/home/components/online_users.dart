@@ -1,5 +1,4 @@
 import 'package:chat_app/controllers/home_controller.dart';
-import 'package:chat_app/data/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
